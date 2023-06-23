@@ -2,17 +2,17 @@ import BN from "../src/utils/BN";
 import { TOKENS_BY_SYMBOL } from "../src/constants";
 import { LimitOrderPredicateAbi__factory } from "../src/predicates";
 import { Predicate, Provider, Wallet } from "fuels";
-import { nodeUrl, privateKey } from "../src/config";
+import { nodeUrl, adminPrivateKey } from "../src/config";
 
 (async () => {
   const token0 = TOKENS_BY_SYMBOL.USDC;
-  const amount0 = BN.parseUnits(20, token0.decimals);
   const token1 = TOKENS_BY_SYMBOL.BTC;
+  const amount0 = BN.parseUnits(20, token0.decimals);
   const amount1 = BN.parseUnits(0.001, token1.decimals);
   const exp = BN.parseUnits(1, 9 + token0.decimals - token1.decimals);
-  let price = amount1.times(exp).div(amount0);
+  const price = amount1.times(exp).div(amount0);
 
-  const wallet = Wallet.fromPrivateKey(privateKey, nodeUrl);
+  const wallet = Wallet.fromPrivateKey(adminPrivateKey, nodeUrl);
 
   // console.log(price.toString());
   const configurableConstants = {
@@ -23,11 +23,12 @@ import { nodeUrl, privateKey } from "../src/config";
     ASSET0_DECINALS: token0.decimals,
     ASSET1_DECINALS: token1.decimals,
   };
-  console.log(configurableConstants);
+
   const predicate = new Predicate(
     LimitOrderPredicateAbi__factory.bin,
+    await wallet.provider.getChainId(), //chainId
     LimitOrderPredicateAbi__factory.abi,
-    new Provider(nodeUrl),
+    wallet.provider,
     configurableConstants
   );
 
@@ -55,14 +56,14 @@ import { nodeUrl, privateKey } from "../src/config";
     }))
   );
   //---------------------
-  const cancelTx = await wallet.transfer(predicate.address, 0, token0.assetId, {
-    gasPrice: 1,
-  });
-  await cancelTx.waitForResult();
-
-  const finalPredicateBalance = await predicate.getBalances();
-  console.log(
-    "finalPredicateBalance",
-    finalPredicateBalance.map((v) => v.amount.toString())
-  );
+  // const cancelTx = await wallet.transfer(predicate.address, 0, token0.assetId, {
+  //   gasPrice: 1,
+  // });
+  // await cancelTx.waitForResult();
+  //
+  // const finalPredicateBalance = await predicate.getBalances();
+  // console.log(
+  //   "finalPredicateBalance",
+  //   finalPredicateBalance.map((v) => v.amount.toString())
+  // );
 })();

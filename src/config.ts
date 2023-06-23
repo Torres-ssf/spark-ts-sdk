@@ -6,6 +6,8 @@ config({ path: path.join(__dirname, "../.env") });
 
 export const mongoUrl = loadVar("MONGO_URL");
 export const port = loadVar("PORT", true);
-export const privateKey = loadVar("PRIVATE_KEY");
+export const adminPrivateKey = loadVar("ADMIN");
+export const alicePrivateKey = loadVar("ALICE");
+export const bobPrivateKey = loadVar("BOB");
 export const contractAddress = loadVar("CONTRACT_ADDRESSES");
 export const nodeUrl = loadVar("NODE_URL");
